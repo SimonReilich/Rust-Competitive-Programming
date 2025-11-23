@@ -3,7 +3,7 @@ pub struct Graph {
     n: usize,
 }
 
-impl super::Graph for Graph {
+impl Graph {
     fn new () -> Graph {
         return Graph { adj_matrix: Vec::new(), n: 0 }
     }
@@ -18,7 +18,9 @@ impl super::Graph for Graph {
         }
         return Graph { adj_matrix: adj_matrix, n: n }
     }
+}
 
+impl super::super::Graph for Graph {
     fn add_vertex (self: &mut Graph) -> usize {
         self.adj_matrix.push(Vec::new());
         for i in 0 .. self.n {
@@ -31,15 +33,6 @@ impl super::Graph for Graph {
         return self.n - 1;
     }
 
-    fn add_edge (self: &mut Graph, u: usize, v: usize) {
-        if self.n <= u.max(v) {
-            loop {
-                if self.add_vertex() < u.max(v) { break; }
-            }
-        }
-        self.adj_matrix[u][v] = true;
-    }
-
     fn has_edge (self: &Graph, u: usize, v: usize) -> bool {
         if self.n <= u.max(v) {
             return false;
@@ -48,8 +41,19 @@ impl super::Graph for Graph {
         }
     }
 
-    fn iter_vertices (self: &Graph) -> impl Iterator<Item=usize> {
-        0 .. self.n
+    fn vertex_count (self: &Self) -> usize {
+        return self.n;
+    }
+}
+
+impl super::Unweighted for Graph {
+    fn add_edge (self: &mut Graph, u: usize, v: usize) {
+        if self.n <= u.max(v) {
+            loop {
+                if super::super::Graph::add_vertex(self) == u.max(v) { break; }
+            }
+        }
+        self.adj_matrix[u][v] = true;
     }
 
     fn iter_edges (self: &Graph) -> impl Iterator<Item=(usize, usize)> {
@@ -91,5 +95,58 @@ impl super::super::Directed for Graph {
                 return None; 
             }
         );
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::graphs::_tests as Tests;
+    use crate::graphs::unweighted::_tests as TestsUnweighted;
+
+    #[test]
+    fn test_new_graph_is_empty() {
+        TestsUnweighted::test_new_graph_is_empty(super::Graph::new());
+    }
+
+    #[test]
+    fn test_new_n_initializes_vertices() {
+        for i in 1 .. 10 {
+            TestsUnweighted::test_new_n_initializes_vertices(super::Graph::new_n(i), i);
+        }
+    }
+
+    #[test]
+    fn test_add_vertex() {
+        Tests::test_add_vertex(super::Graph::new());
+    }
+
+    #[test]
+    fn test_add_and_check_edge() {
+        TestsUnweighted::directed::test_add_and_check_edge(super::Graph::new());
+    }
+
+    #[test]
+    fn test_successors() {
+        TestsUnweighted::directed::test_successors(super::Graph::new());
+    }
+
+    #[test]
+    fn test_predecessors() {
+        TestsUnweighted::directed::test_predecessors(super::Graph::new());
+    }
+
+    #[test]
+    fn test_iter_vertices() {
+        Tests::test_iter_vertices(super::Graph::new());
+    }
+
+    #[test]
+    fn test_iter_edges_global() {
+        TestsUnweighted::directed::test_iter_edges_global(super::Graph::new())
+    }
+
+    #[test]
+    fn test_self_loop() {
+        TestsUnweighted::directed::test_self_loop(super::Graph::new());
     }
 }

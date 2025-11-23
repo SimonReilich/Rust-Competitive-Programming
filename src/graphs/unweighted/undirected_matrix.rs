@@ -3,7 +3,7 @@ pub struct Graph {
     n: usize,
 }
 
-impl super::Graph for Graph {
+impl Graph {
     fn new () -> Graph {
         return Graph { adj_matrix: Vec::new(), n: 0 }
     }
@@ -18,7 +18,9 @@ impl super::Graph for Graph {
         }
         return Graph { adj_matrix: adj_matrix, n: n }
     }
+}
 
+impl super::super::Graph for Graph {
     fn add_vertex (self: &mut Graph) -> usize {
         self.adj_matrix.push(Vec::new());
         self.n = self.n + 1;
@@ -28,21 +30,8 @@ impl super::Graph for Graph {
         return self.n - 1;
     }
 
-    fn add_edge (self: &mut Graph, u: usize, v: usize) {
-        if u < v {
-            self.add_edge(v, u);
-        } else {
-            if self.n <= u.max(v) {
-                loop {
-                    if self.add_vertex() < u.max(v) { break; }
-                }
-            }
-            self.adj_matrix[u][v] = true;
-        }
-    }
-
     fn has_edge (self: &Graph, u: usize, v: usize) -> bool {
-        if u > v {
+        if u < v {
             return self.has_edge(v, u);
         } else {
             if self.n <= u.max(v) {
@@ -53,8 +42,23 @@ impl super::Graph for Graph {
         }
     }
 
-    fn iter_vertices (self: &Graph) -> impl Iterator<Item=usize> {
-        0 .. self.n
+    fn vertex_count (self: &Self) -> usize {
+        return self.n;
+    }
+}
+
+impl super::Unweighted for Graph {
+    fn add_edge (self: &mut Graph, u: usize, v: usize) {
+        if u < v {
+            self.add_edge(v, u);
+        } else {
+            if self.n <= u.max(v) {
+                loop {
+                    if super::super::Graph::add_vertex(self) == u.max(v) { break; }
+                }
+            }
+            self.adj_matrix[u][v] = true;
+        }
     }
 
     fn iter_edges (self: &Graph) -> impl Iterator<Item=(usize, usize)> {
@@ -65,15 +69,14 @@ impl super::Graph for Graph {
             .flat_map(|(u, list)| list
                 .into_iter()
                 .enumerate()
-                .filter_map(move |(v, b)| if b { return Some((u, v)); } else { return None; }
-            )
-        );
+                .filter_map(move |(v, b)| if b { return Some((u, v)); } else { return None; }))
+            .map(|(u, v)| if u < v { return (u, v); } else { return (v, u); });
     }
 }
 
 impl super::super::Undirected for Graph {
     fn iter_neighbors (self: &Graph, u: usize) -> impl Iterator<Item=usize> {
-        return self.iter_predecessors(u).chain(self.iter_successors(u));
+        return self.iter_predecessors(u).chain(self.iter_successors(u).filter(move |v| *v != u));
     }
 }
 
@@ -98,5 +101,53 @@ impl Graph {
                 }
             }
         );
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::graphs::_tests as Tests;
+    use crate::graphs::unweighted::_tests as TestsUnweighted;
+
+    #[test]
+    fn test_new_graph_is_empty() {
+        TestsUnweighted::test_new_graph_is_empty(super::Graph::new());
+    }
+
+    #[test]
+    fn test_new_n_initializes_vertices() {
+        for i in 1 .. 10 {
+            TestsUnweighted::test_new_n_initializes_vertices(super::Graph::new_n(i), i);
+        }
+    }
+
+    #[test]
+    fn test_add_vertex() {
+        Tests::test_add_vertex(super::Graph::new());
+    }
+
+    #[test]
+    fn test_add_and_check_edge() {
+        TestsUnweighted::undirected::test_add_and_check_edge(super::Graph::new());
+    }
+
+    #[test]
+    fn test_neighbors() {
+        TestsUnweighted::undirected::test_neighbors(super::Graph::new());
+    }
+
+    #[test]
+    fn test_iter_vertices() {
+        Tests::test_iter_vertices(super::Graph::new());
+    }
+
+    #[test]
+    fn test_iter_edges_global() {
+        TestsUnweighted::undirected::test_iter_edges_global(super::Graph::new())
+    }
+
+    #[test]
+    fn test_self_loop() {
+        TestsUnweighted::undirected::test_self_loop(super::Graph::new());
     }
 }

@@ -3,7 +3,7 @@ pub struct Graph<W> {
     n: usize,
 }
 
-impl <W: Clone + Copy> super::GraphWeighted<W> for Graph<W> {
+impl <W: Clone + Copy> Graph<W> {
     fn new () -> Graph<W> {
         return Graph { adj_list: Vec::new(), n: 0 }
     }
@@ -16,28 +16,48 @@ impl <W: Clone + Copy> super::GraphWeighted<W> for Graph<W> {
         return Graph { adj_list: adj_list, n: n }
     }
 
+}
+
+impl <W: Clone + Copy> super::super::Graph for Graph<W> {
     fn add_vertex (self: &mut Graph<W>) -> usize {
         self.adj_list.push(Vec::new());
         self.n = self.n + 1;
         return self.n - 1;
     }
 
+    fn has_edge (self: &Graph<W>, u: usize, v: usize) -> bool {
+        if u > v {
+            return self.has_edge(v, u);
+        } else if self.n <= u.max(v) {
+            return false;
+        } else {
+            return self.adj_list[u].clone().into_iter()
+                .any(|(v_prime, _)| v_prime == v);
+        }
+    }
+
+    fn vertex_count (self: &Self) -> usize {
+        return self.n;
+    }
+}
+
+impl <W: Clone + Copy> super::Weighted<W> for Graph<W> {
     fn add_edge (self: &mut Graph<W>, u: usize, weight: W, v: usize) {
         if u > v {
             self.add_edge(v, weight, u);
         } else {
             if self.n <= u.max(v) {
                 loop {
-                    if self.add_vertex() < u.max(v) { break; }
+                    if super::super::Graph::add_vertex(self) == u.max(v) { break; }
                 }
             }
             self.adj_list[u].push((v, weight));
         }
     }
 
-    fn has_edge (self: &Graph<W>, u: usize, v: usize) -> Vec<W> {
+    fn get_weight (self: &Graph<W>, u: usize, v: usize) -> Vec<W> {
         if u > v {
-            return self.has_edge(v, u);
+            return self.get_weight(v, u);
         } else if self.n <= u.max(v) {
             return Vec::new();
         } else {
@@ -46,10 +66,6 @@ impl <W: Clone + Copy> super::GraphWeighted<W> for Graph<W> {
                 .map(|(_, w)| w)
                 .collect();
         }
-    }
-
-    fn iter_vertices (self: &Graph<W>) -> impl Iterator<Item=usize> {
-        0 .. self.n
     }
 
     fn iter_edges (self: &Graph<W>) -> impl Iterator<Item=(usize, W, usize)> {
@@ -66,7 +82,7 @@ impl <W: Clone + Copy> super::GraphWeighted<W> for Graph<W> {
 
 impl <W: Clone + Copy> super::super::Undirected for Graph<W> {
     fn iter_neighbors (self: &Graph<W>, u: usize) -> impl Iterator<Item=usize> {
-        return self.iter_predecessors(u).chain(self.iter_successors(u));
+        return self.iter_predecessors(u).chain(self.iter_successors(u).filter(move |v| *v != u));
     }
 }
 
@@ -88,5 +104,53 @@ impl <W: Clone + Copy> Graph<W> {
                 }
             }
         );
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::graphs::_tests as Tests;
+    use crate::graphs::weighted::_tests as TestsWeighted;
+
+    #[test]
+    fn test_new_graph_is_empty() {
+        TestsWeighted::test_new_graph_is_empty(super::Graph::new());
+    }
+
+    #[test]
+    fn test_new_n_initializes_vertices() {
+        for i in 1 .. 10 {
+            TestsWeighted::test_new_n_initializes_vertices(super::Graph::new_n(i), i);
+        }
+    }
+
+    #[test]
+    fn test_add_vertex() {
+        Tests::test_add_vertex(super::Graph::<u32>::new());
+    }
+
+    #[test]
+    fn test_add_and_check_edge() {
+        TestsWeighted::undirected::test_add_and_check_edge(super::Graph::new());
+    }
+
+    #[test]
+    fn test_neighbors() {
+        TestsWeighted::undirected::test_neighbors(super::Graph::new());
+    }
+
+    #[test]
+    fn test_iter_vertices() {
+        Tests::test_iter_vertices(super::Graph::<u32>::new());
+    }
+
+    #[test]
+    fn test_iter_edges_global() {
+        TestsWeighted::undirected::test_iter_edges_global(super::Graph::new())
+    }
+
+    #[test]
+    fn test_self_loop() {
+        TestsWeighted::undirected::test_self_loop(super::Graph::new());
     }
 }
