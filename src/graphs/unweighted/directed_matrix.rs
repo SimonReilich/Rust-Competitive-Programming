@@ -51,6 +51,26 @@ impl super::super::Graph for Graph {
             .enumerate()
             .filter_map(|(v, b)| if b { return Some(v); } else { return None });
     }
+
+    fn iter_predecessors (self: &Graph, v: usize) -> impl Iterator<Item=usize> {
+        return self.adj_matrix
+            .clone()
+            .into_iter()
+            .enumerate()
+            .filter_map(move |(u, list)| if list
+                .into_iter()
+                .enumerate()
+                .filter(|(v_prime, b)| *b && *v_prime == v)
+                .peekable()
+                .peek()
+                .is_some() 
+            { 
+                return Some(u); 
+            } else { 
+                return None; 
+            }
+        );
+    }
 }
 
 impl super::Unweighted for Graph {
@@ -72,28 +92,6 @@ impl super::Unweighted for Graph {
                 .enumerate()
                 .filter_map(move |(v, b)| if b { return Some((u, v)); } else { return None; }
             )
-        );
-    }
-}
-
-impl super::super::Directed for Graph {
-    fn iter_predecessors (self: &Graph, v: usize) -> impl Iterator<Item=usize> {
-        return self.adj_matrix
-            .clone()
-            .into_iter()
-            .enumerate()
-            .filter_map(move |(u, list)| if list
-                .into_iter()
-                .enumerate()
-                .filter(|(v_prime, b)| *b && *v_prime == v)
-                .peekable()
-                .peek()
-                .is_some() 
-            { 
-                return Some(u); 
-            } else { 
-                return None; 
-            }
         );
     }
 }

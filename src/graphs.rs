@@ -6,9 +6,7 @@ pub trait Graph {
     fn vertex_count (self: &Self) -> usize;
 
     fn iter_successors (self: &Self, u: usize) -> impl Iterator<Item=usize>;
-}
 
-pub trait Directed {
     fn iter_predecessors (self: &Self, v: usize) -> impl Iterator<Item=usize>;
 }
 

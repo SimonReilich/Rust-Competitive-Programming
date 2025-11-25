@@ -47,7 +47,11 @@ impl super::super::Graph for Graph {
     }
 
     fn iter_successors (self: &Graph, u: usize) -> impl Iterator<Item=usize> {
-        return self.iter_predecessors(u).chain(self.iter_successors_1(u).filter(move |v| *v != u));
+        return self.iter_predecessors_1(u).chain(self.iter_successors_1(u).filter(move |v| *v != u));
+    }
+
+    fn iter_predecessors (self: &Self, v: usize) -> impl Iterator<Item=usize> {
+        return self.iter_successors(v);
     }
 }
 
@@ -87,7 +91,7 @@ impl Graph {
             .map(|(v, _)| v);
     }
 
-    fn iter_predecessors (self: &Graph, v: usize) -> impl Iterator<Item=usize> {
+    fn iter_predecessors_1 (self: &Graph, v: usize) -> impl Iterator<Item=usize> {
         return self.adj_matrix.clone()
             .into_iter()
             .enumerate()

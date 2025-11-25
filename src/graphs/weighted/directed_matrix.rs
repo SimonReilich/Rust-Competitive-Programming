@@ -51,6 +51,26 @@ impl <W: Clone + Copy> super::super::Graph for Graph<W> {
             .enumerate()
             .filter_map(|(v, b)| if b.is_some() { return Some(v); } else { return None });
     }
+
+    fn iter_predecessors (self: &Graph<W>, v: usize) -> impl Iterator<Item=usize> {
+        return self.adj_matrix
+            .clone()
+            .into_iter()
+            .enumerate()
+            .filter_map(move |(u, list)| if list
+                .into_iter()
+                .enumerate()
+                .filter(|(v_prime, b)| b.is_some() && *v_prime == v)
+                .peekable()
+                .peek()
+                .is_some() 
+            { 
+                return Some(u); 
+            } else { 
+                return None; 
+            }
+        );
+    }
 }
 
 impl <W: Clone + Copy> super::Weighted<W> for Graph<W> {
@@ -82,28 +102,6 @@ impl <W: Clone + Copy> super::Weighted<W> for Graph<W> {
                 .enumerate()
                 .filter_map(move |(v, o)| if let Some(w) = o { return Some((u, w, v)); } else { return None; }
             )
-        );
-    }
-}
-
-impl <W: Clone + Copy> super::super::Directed for Graph<W> {
-    fn iter_predecessors (self: &Graph<W>, v: usize) -> impl Iterator<Item=usize> {
-        return self.adj_matrix
-            .clone()
-            .into_iter()
-            .enumerate()
-            .filter_map(move |(u, list)| if list
-                .into_iter()
-                .enumerate()
-                .filter(|(v_prime, b)| b.is_some() && *v_prime == v)
-                .peekable()
-                .peek()
-                .is_some() 
-            { 
-                return Some(u); 
-            } else { 
-                return None; 
-            }
         );
     }
 }

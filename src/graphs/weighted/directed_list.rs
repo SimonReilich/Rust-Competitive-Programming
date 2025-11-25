@@ -40,6 +40,21 @@ impl <W: Clone + Copy> super::super::Graph for Graph<W> {
     fn iter_successors (self: &Graph<W>, u: usize) -> impl Iterator<Item=usize> {
         return self.adj_list[u].clone().into_iter().map(|(v, _)| v);
     }
+
+    fn iter_predecessors (self: &Graph<W>, v: usize) -> impl Iterator<Item=usize> {
+        return self.adj_list
+            .clone()
+            .into_iter()
+            .enumerate()
+            .filter_map(move |(u, list)| {
+                if list.into_iter().any(|(v_prime, _)| v_prime == v) { 
+                    return Some(u); 
+                } else { 
+                    return None; 
+                }
+            }
+        );
+    }
 }
 
 impl <W: Clone + Copy> super::Weighted<W> for Graph<W> {
@@ -71,23 +86,6 @@ impl <W: Clone + Copy> super::Weighted<W> for Graph<W> {
                 .into_iter()
                 .map(move |(v, w)| (u, w, v)
             )
-        );
-    }
-}
-
-impl <W: Clone + Copy> super::super::Directed for Graph<W> {
-    fn iter_predecessors (self: &Graph<W>, v: usize) -> impl Iterator<Item=usize> {
-        return self.adj_list
-            .clone()
-            .into_iter()
-            .enumerate()
-            .filter_map(move |(u, list)| {
-                if list.into_iter().any(|(v_prime, _)| v_prime == v) { 
-                    return Some(u); 
-                } else { 
-                    return None; 
-                }
-            }
         );
     }
 }

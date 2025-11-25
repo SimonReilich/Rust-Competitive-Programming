@@ -41,7 +41,11 @@ impl <W: Clone + Copy> super::super::Graph for Graph<W> {
     }
 
     fn iter_successors (self: &Graph<W>, u: usize) -> impl Iterator<Item=usize> {
-        return self.iter_predecessors(u).chain(self.iter_successors_1(u).filter(move |v| *v != u));
+        return self.iter_predecessors_1(u).chain(self.iter_successors_1(u).filter(move |v| *v != u));
+    }
+
+    fn iter_predecessors (self: &Self, v: usize) -> impl Iterator<Item=usize> {
+        return self.iter_successors_1(v);
     }
 }
 
@@ -89,7 +93,7 @@ impl <W: Clone + Copy> Graph<W> {
         return self.adj_list[u].clone().into_iter().map(|(v, _)| v);
     }
 
-    fn iter_predecessors (self: &Graph<W>, v: usize) -> impl Iterator<Item=usize> {
+    fn iter_predecessors_1 (self: &Graph<W>, v: usize) -> impl Iterator<Item=usize> {
         return self.adj_list
             .clone()
             .into_iter()

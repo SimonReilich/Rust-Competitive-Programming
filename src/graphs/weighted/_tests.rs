@@ -20,7 +20,7 @@ pub fn test_new_n_initializes_vertices (graph: impl Weighted<u32>, n: usize) {
 }
 
 pub mod directed {
-    use crate::graphs::{Directed, weighted::Weighted};
+    use crate::graphs::{weighted::Weighted};
 
     pub fn test_add_and_check_edge (mut graph: impl Weighted<u32>) {
         // Add edge 0 -> 1
@@ -34,7 +34,7 @@ pub mod directed {
         assert!(!graph.has_edge(0, 2), "Edge 0->2 should NOT exist");
     }
 
-    pub fn test_successors (mut graph: impl Weighted<u32> + Directed) {
+    pub fn test_successors (mut graph: impl Weighted<u32>) {
         // 0 points to 1 and 2
         graph.add_edge(0, 1, 1);
         graph.add_edge(0, 1, 2);
@@ -52,7 +52,7 @@ pub mod directed {
         assert!(succ_3.is_empty());
     }
 
-    pub fn test_predecessors (mut graph: impl Weighted<u32> + Directed) {
+    pub fn test_predecessors (mut graph: impl Weighted<u32>) {
         // 0 -> 2
         // 1 -> 2
         // 2 -> 3
@@ -70,7 +70,7 @@ pub mod directed {
         assert!(pred_0.is_empty());
     }
 
-    pub fn test_self_loop (mut graph: impl Weighted<u32> + Directed) {
+    pub fn test_self_loop (mut graph: impl Weighted<u32>) {
         graph.add_edge(0, 1, 0);
 
         assert!(graph.has_edge(0, 0));
