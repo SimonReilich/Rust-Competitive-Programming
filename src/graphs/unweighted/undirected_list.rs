@@ -4,11 +4,11 @@ pub struct Graph {
 }
 
 impl Graph {
-    fn new () -> Graph {
+    pub fn new () -> Graph {
         return Graph { adj_list: Vec::new(), n: 0 }
     }
 
-    fn new_n (n: usize) -> Graph {
+    pub fn new_n (n: usize) -> Graph {
         let mut adj_list = Vec::new();
         for _ in 0 .. n {
             adj_list.push(Vec::new());
@@ -39,6 +39,10 @@ impl super::super::Graph for Graph {
     fn vertex_count (self: &Self) -> usize {
         return self.n;
     }
+
+    fn iter_successors (self: &Graph, u: usize) -> impl Iterator<Item=usize> {
+        return self.iter_predecessors(u).chain(self.iter_successors_1(u).filter(move |v| *v != u));
+    }
 }
 
 impl super::Unweighted for Graph {
@@ -68,14 +72,8 @@ impl super::Unweighted for Graph {
     }
 }
 
-impl super::super::Undirected for Graph {
-    fn iter_neighbors (self: &Graph, u: usize) -> impl Iterator<Item=usize> {
-        return self.iter_predecessors(u).chain(self.iter_successors(u).filter(move |v| *v != u));
-    }
-}
-
 impl Graph {
-    fn iter_successors (self: &Graph, u: usize) -> impl Iterator<Item=usize> {
+    fn iter_successors_1 (self: &Graph, u: usize) -> impl Iterator<Item=usize> {
         return self.adj_list[u].clone().into_iter();
     }
 

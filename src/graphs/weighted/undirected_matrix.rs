@@ -4,11 +4,11 @@ pub struct Graph<W> {
 }
 
 impl <W: Clone + Copy> Graph<W> {
-    fn new () -> Graph<W> {
+    pub fn new () -> Graph<W> {
         return Graph { adj_matrix: Vec::new(), n: 0 }
     }
 
-    fn new_n (n: usize) -> Graph<W> {
+    pub fn new_n (n: usize) -> Graph<W> {
         let mut adj_matrix = Vec::new();
         for i in 0 .. n {
             adj_matrix.push(Vec::new());
@@ -42,6 +42,10 @@ impl <W: Clone + Copy> super::super::Graph for Graph<W> {
 
     fn vertex_count (self: &Self) -> usize {
         return self.n;
+    }
+
+    fn iter_successors (self: &Graph<W>, u: usize) -> impl Iterator<Item=usize> {
+        return self.iter_predecessors(u).chain(self.iter_successors_1(u).filter(move |v| *v != u));
     }
 }
 
@@ -83,14 +87,8 @@ impl <W: Clone + Copy> super::Weighted<W> for Graph<W> {
     }
 }
 
-impl <W: Clone + Copy> super::super::Undirected for Graph<W> {
-    fn iter_neighbors (self: &Graph<W>, u: usize) -> impl Iterator<Item=usize> {
-        return self.iter_predecessors(u).chain(self.iter_successors(u).filter(move |v| *v != u));
-    }
-}
-
 impl <W: Clone + Copy> Graph<W> {
-    fn iter_successors (self: &Graph<W>, u: usize) -> impl Iterator<Item=usize> {
+    fn iter_successors_1 (self: &Graph<W>, u: usize) -> impl Iterator<Item=usize> {
         return self.adj_matrix[u].clone()
             .into_iter()
             .enumerate()

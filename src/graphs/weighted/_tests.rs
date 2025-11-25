@@ -99,7 +99,7 @@ pub mod directed {
 }
 
 pub mod undirected {
-    use crate::graphs::{Undirected, weighted::Weighted};
+    use crate::graphs::{weighted::Weighted};
 
     pub fn test_add_and_check_edge (mut graph: impl Weighted<u32>) {
         // Add edge 0 -> 1
@@ -110,7 +110,7 @@ pub mod undirected {
         assert!(!graph.has_edge(0, 2), "Edge 0->2 should NOT exist");
     }
 
-    pub fn test_neighbors (mut graph: impl Weighted<u32> + Undirected) {
+    pub fn test_neighbors (mut graph: impl Weighted<u32>) {
         // 0 -- 2
         // 1 -- 2
         // 2 -- 3
@@ -119,22 +119,22 @@ pub mod undirected {
         graph.add_edge(2, 1, 3);
         graph.add_vertex();
 
-        let n_2 = super::sorted(graph.iter_neighbors(2));
+        let n_2 = super::sorted(graph.iter_successors(2));
         assert_eq!(n_2, vec![0, 1, 3]);
 
-        let n_3 = super::sorted(graph.iter_neighbors(3));
+        let n_3 = super::sorted(graph.iter_successors(3));
         assert_eq!(n_3, vec![2]);
 
-        let n_4 = super::sorted(graph.iter_neighbors(4));
+        let n_4 = super::sorted(graph.iter_successors(4));
         assert!(n_4.is_empty());
     }
 
-    pub fn test_self_loop (mut graph: impl Weighted<u32> + Undirected) {
+    pub fn test_self_loop (mut graph: impl Weighted<u32>) {
         graph.add_edge(0, 1, 0);
 
         assert!(graph.has_edge(0, 0));
 
-        let n = super::sorted(graph.iter_neighbors(0));
+        let n = super::sorted(graph.iter_successors(0));
         assert_eq!(n, vec![0]);
     }
 
