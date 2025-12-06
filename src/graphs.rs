@@ -14,4 +14,5 @@ pub mod algorithms;
 pub mod unweighted;
 pub mod weighted;
 
+#[cfg(test)]
 mod _tests;

@@ -13,4 +13,5 @@ pub mod directed_matrix;
 pub mod undirected_list;
 pub mod undirected_matrix;
 
+#[cfg(test)]
 mod _tests;

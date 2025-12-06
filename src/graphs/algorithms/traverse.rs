@@ -53,6 +53,7 @@ fn bfs_explore(graph: &impl Graph, o: &mut Vec<Option<usize>>, q: &mut VecDeque<
     }
 }
 
+#[cfg(test)]
 mod tests {
     mod dfs {
         use super::super::depth_first_search;
